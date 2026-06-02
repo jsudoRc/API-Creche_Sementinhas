@@ -13,3 +13,11 @@ CREATE TABLE IF NOT EXISTS responsaveis_transporte(
        parentesco TEXT NOT NULL
 
 );
+
+CREATE TABLE IF NOT EXISTS telefones_transporte (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero TEXT NOT NULL,
+    
+    transporte_id INTEGER NOT NULL,
+    FOREIGN KEY (transporte_id) REFERENCES responsaveis_transporte(id) ON DELETE CASCADE
+);
