@@ -20,3 +20,18 @@ Content-Type: application/json
     "email": "email-invalido",
     "senha": "123"
 }
+
+
+### ==========================================
+### 6. EXTRAS (Transporte, Emergência, Arquivos)
+### ==========================================
+
+### Cadastrar o Tio da Van (Transporte)
+POST http://localhost:3000/responsaveis-transporte
+Content-Type: application/json
+
+{
+    "nome": "Tio Valdir (Van)",
+    "rg": "12345678X",
+    "parentesco": "Motorista Contratado"
+}
