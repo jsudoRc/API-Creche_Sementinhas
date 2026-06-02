@@ -1,4 +1,4 @@
---TABELA FUNCIONÁRIO
+-- Tabela de funcionários
 CREATE TABLE IF NOT EXISTS funcionarios(
      id INTEGER PRIMARY KEY AUTOINCREMENT,
      nome TEXT NOT NULL,
@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS funcionarios(
      senha TEXT NOT NULL
 );
 
+-- Tabela de responsáveis pelo transporte
 CREATE TABLE IF NOT EXISTS responsaveis_transporte(
        id INTEGER PRIMARY KEY AUTOINCREMENT,
        nome TEXT NOT NULL,
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS responsaveis_transporte(
 
 );
 
+--Telefones do Transporte e Emergência
 CREATE TABLE IF NOT EXISTS telefones_transporte (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     numero TEXT NOT NULL,
