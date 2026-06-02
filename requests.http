@@ -1,0 +1,37 @@
+### Listar todos os funcionários (Deve trazer a Tia Maria e o Tio João do nosso seed)
+GET http://localhost:3000/funcionarios
+
+### Criar uma nova professora
+POST http://localhost:3000/funcionarios
+Content-Type: application/json
+
+{
+    "nome": "Tia Roberta",
+    "email": "roberta@sementinhas.com",
+    "senha": "senhaforte123"
+}
+
+### Teste de Falha (Zod) - Tentar criar funcionário com e-mail inválido
+POST http://localhost:3000/funcionarios
+Content-Type: application/json
+
+{
+    "nome": "Hacker da Silva",
+    "email": "email-invalido",
+    "senha": "123"
+}
+
+
+### ==========================================
+### 6. EXTRAS (Transporte, Emergência, Arquivos)
+### ==========================================
+
+### Cadastrar o Tio da Van (Transporte)
+POST http://localhost:3000/responsaveis-transporte
+Content-Type: application/json
+
+{
+    "nome": "Tio Valdir (Van)",
+    "rg": "12345678X",
+    "parentesco": "Motorista Contratado"
+}
