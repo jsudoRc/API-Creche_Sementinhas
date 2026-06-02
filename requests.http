@@ -1,0 +1,22 @@
+### Listar todos os funcionários (Deve trazer a Tia Maria e o Tio João do nosso seed)
+GET http://localhost:3000/funcionarios
+
+### Criar uma nova professora
+POST http://localhost:3000/funcionarios
+Content-Type: application/json
+
+{
+    "nome": "Tia Roberta",
+    "email": "roberta@sementinhas.com",
+    "senha": "senhaforte123"
+}
+
+### Teste de Falha (Zod) - Tentar criar funcionário com e-mail inválido
+POST http://localhost:3000/funcionarios
+Content-Type: application/json
+
+{
+    "nome": "Hacker da Silva",
+    "email": "email-invalido",
+    "senha": "123"
+}
