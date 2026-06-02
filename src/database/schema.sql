@@ -5,3 +5,11 @@ CREATE TABLE IF NOT EXISTS funcionarios(
      email TEXT NOT NULL UNIQUE,
      senha TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS responsaveis_transporte(
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       nome TEXT NOT NULL,
+       rg TEXT NOT NULL UNIQUE,
+       parentesco TEXT NOT NULL
+
+);
