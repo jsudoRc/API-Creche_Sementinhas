@@ -9,19 +9,19 @@ import { turmaRepository } from '../repositories/turma.repository';
 
 export const turmaService = {
 
-    async listarTurmas(): Promise<Turma[]> {
+    async getAll(): Promise<Turma[]> {
         return turmaRepository.findAll();
     },
 
-    async buscarPorId(id: number): Promise<Turma | null> {
+    async getById(id: number): Promise<Turma | null> {
         return turmaRepository.findById(id);
     },
 
-    async buscarPorNome(nome: string): Promise<Turma[]> {
+    async getByName(nome: string): Promise<Turma[]> {
         return turmaRepository.findByName(nome);
     },
 
-    async criarTurma(
+    async create(
         input: CreateTurmaInput
     ): Promise<Turma> {
 
@@ -35,7 +35,7 @@ export const turmaService = {
         return turmaRepository.create(input);
     },
 
-    async atualizarTurma(
+    async update(
         id: number,
         input: UpdateTurmaInput
     ): Promise<Turma | null> {
@@ -62,7 +62,7 @@ export const turmaService = {
         return turmaRepository.update(id, input);
     },
 
-    async excluirTurma(id: number): Promise<boolean> {
+    async delete(id: number): Promise<boolean> {
 
         const turmaExistente =
             await turmaRepository.findById(id);
