@@ -1,0 +1,21 @@
+### ==========================================
+### 5. MATRÍCULA (O Contrato Físico)
+### ==========================================
+
+### Gerar a Matrícula do Enzo (Aluno ID 1)
+POST http://localhost:3000/matriculas
+Content-Type: application/json
+
+{
+    "plano": "Integral",
+    "valor_mensalidade": 850.50,
+    "data_venc": 10,
+    "inicio_vigencia": "2026-06-01",
+    "fim_vigencia": "2026-12-15",
+    "forma_pagamento": "PIX",
+    "aluno_id": 1
+}
+
+### Listar Matrículas
+GET http://localhost:3000/matriculas
+
