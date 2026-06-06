@@ -1,19 +1,15 @@
-export interface Aluno {
-    id:number;
-    nome:string;
-    data_nasc:string;
-    andarilha:number;
-    autorizacao_img:number;
-    sexo:string |null;
-    receita_antitermico:string|null;
-    cirurgia_qual:string |null;
-    cirurgia_tempo:string |null;
-    observacoes: string | null;
-
-    turma_id:number;
-    funcionario_id:number;
-
+export interface Matricula {
+    id: number;
+    plano: string;
+    valor_mensalidade: number; // O REAL do banco vira number aqui
+    data_venc: number;
+    inicio_vigencia: string;
+    fim_vigencia: string;
+    forma_pagamento: string;
+    data_saida: string | null;
+    
+    aluno_id: number;
 }
 
-export type CreateAlunoInput = Omit<Aluno,'id'>;
-export type UpdateAlunoInput = Partial<CreateAlunoInput>;
+export type CreateMatriculaInput = Omit<Matricula, 'id'>;
+export type UpdateMatriculaInput = Partial<CreateMatriculaInput>;
