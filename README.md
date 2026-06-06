@@ -1,7 +1,7 @@
 # Projeto Integrador 2 semestre
 
 Integrantes: 
-->Vitor
+->Victor
 ->Ezequiel
 ->Gabriel Cruz
 ->Jonas
