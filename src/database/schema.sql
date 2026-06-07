@@ -36,10 +36,10 @@ CREATE TABLE IF NOT EXISTS responsaveis_transporte(
 );
 
 CREATE TABLE IF NOT EXISTS contato_emergencia(
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       nome TEXT NOT NULL,
-       rg TEXT NOT NULL UNIQUE,
-       parentesco TEXT NOT NULL
+       id           INTEGER PRIMARY KEY AUTOINCREMENT,
+       nome         VARCHAR (150) NOT NULL,
+       rg           VARCHAR (11) NOT NULL UNIQUE,
+       parentesco   VARCHAR (20) NOT NULL
 );
 
 -- ==========================================
