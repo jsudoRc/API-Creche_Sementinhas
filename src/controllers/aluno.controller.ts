@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { alunoService } from '../services/aluno.service';
+import { alunoService } from '../services/aluno.services';
 import { createAlunoSchema, updateAlunoSchema } from '../schemas/aluno.schema';
 
 export const alunoController = {
