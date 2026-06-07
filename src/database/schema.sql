@@ -94,3 +94,33 @@ CREATE TABLE IF NOT EXISTS telefones_emergencia (
     FOREIGN KEY (emergencia_id) REFERENCES contato_emergencia(id) ON DELETE CASCADE
 );
 
+ --Tabelas associativas 
+CREATE TABLE IF NOT EXISTS alunos_responsaveis (
+    aluno_id INTEGER NOT NULL,
+    responsavel_id INTEGER NOT NULL,
+
+    FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE,
+    FOREIGN KEY (responsavel_id) REFERENCES responsaveis(id) ON DELETE CASCADE,
+
+    PRIMARY KEY (aluno_id,responsavel_id)
+);
+
+CREATE TABLE IF NOT EXISTS alunos_transporte (
+    aluno_id INTEGER NOT NULL,
+    transporte_id INTEGER NOT NULL,
+
+    FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE,
+    FOREIGN KEY (transporte_id) REFERENCES responsaveis_transporte(id) ON DELETE CASCADE,
+
+    PRIMARY KEY (aluno_id,transporte_id)
+);
+
+CREATE TABLE IF NOT EXISTS alunos_emergencia (
+    aluno_id INTEGER NOT NULL,
+    emergencia_id INTEGER NOT NULL,
+    
+    FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE,
+    FOREIGN KEY (emergencia_id) REFERENCES contato_emergencia(id) ON DELETE CASCADE,
+    PRIMARY KEY (aluno_id, emergencia_id)
+);
+
