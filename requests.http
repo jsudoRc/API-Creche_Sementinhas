@@ -1,3 +1,7 @@
+### ==========================================
+### 1. FUNCIONÁRIOS (O Sistema de Login)
+### ==========================================
+
 ### Listar todos os funcionários (Deve trazer a Tia Maria e o Tio João do nosso seed)
 GET http://localhost:3000/funcionarios
 
@@ -21,14 +25,38 @@ Content-Type: application/json
     "senha": "123"
 }
 
-
 ### ==========================================
 ### 2. TURMAS (Organização)
 ### ==========================================
 
-### Listar Turmas
+### Listar Turmas (Deve trazer o Berçário e o Maternal I do seed)
 GET http://localhost:3000/turmas
 
+### Criar uma nova Turma (Testando o Schema Novo!)
+POST http://localhost:3000/turmas
+Content-Type: application/json
+
+{
+    "nome": "Jardim I",
+    "idade_min": 4,
+    "idade_max": 5,
+    "capacidade": 20,
+    "valor_mensal": 650.00,
+    "periodo": "manhã"
+}
+
+### Teste de Falha (Zod) - Idade Mínima maior que a Máxima
+POST http://localhost:3000/turmas
+Content-Type: application/json
+
+{
+    "nome": "Turma Invalida",
+    "idade_min": 5,
+    "idade_max": 3,
+    "capacidade": 10,
+    "valor_mensal": 500.00,
+    "periodo": "integral"
+}
 
 ### ==========================================
 ### 3. ALUNOS (A Ficha de Anamnese)
@@ -44,10 +72,9 @@ Content-Type: application/json
     "andarilha": 1,
     "autorizacao_img": 1,
     "turma_id": 1,
-    "funcionario_id": 2,
+    "funcionario_id": 1,
     "observacoes": "Alergia a amendoim"
 }
-
 
 ### Listar Alunos (Deve mostrar o Enzo)
 GET http://localhost:3000/alunos
@@ -60,7 +87,6 @@ Content-Type: application/json
     "cirurgia_qual": "Retirada de amígdalas",
     "cirurgia_tempo": "2 meses atrás"
 }
-
 
 ### ==========================================
 ### 4. RESPONSÁVEIS PRINCIPAIS
@@ -82,7 +108,6 @@ Content-Type: application/json
 ### Listar Responsáveis
 GET http://localhost:3000/responsaveis
 
-
 ### ==========================================
 ### 5. MATRÍCULA (O Contrato Físico)
 ### ==========================================
@@ -103,7 +128,6 @@ Content-Type: application/json
 
 ### Listar Matrículas
 GET http://localhost:3000/matriculas
-
 
 ### ==========================================
 ### 6. EXTRAS (Transporte, Emergência, Arquivos)
