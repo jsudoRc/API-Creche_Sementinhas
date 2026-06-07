@@ -77,6 +77,34 @@ CREATE TABLE IF NOT EXISTS alunos (
     FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)
 );
 
+CREATE TABLE IF NOT EXISTS responsaveis(
+
+       id INTEGER PRIMARY KEY AUTOINCREMENT ,
+       nome TEXT NOT NULL,
+       cpf TEXT NOT NULL UNIQUE,
+       cep TEXT NOT NULL,
+       parentesco TEXT NOT NULL,
+       profissao TEXT,
+       responsavel_finance INTEGER DEFAULT 0
+);
+
+-- Telefones e E-mails dos Responsáveis Principais
+CREATE TABLE IF NOT EXISTS telefones_responsaveis (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero TEXT NOT NULL,
+    
+    responsavel_id INTEGER NOT NULL,
+    FOREIGN KEY (responsavel_id) REFERENCES responsaveis(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS emails_responsaveis (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    
+    responsavel_id INTEGER NOT NULL,
+    FOREIGN KEY (responsavel_id) REFERENCES responsaveis(id) ON DELETE CASCADE
+);
+
 -- Telefones do Transporte e Emergência
 CREATE TABLE IF NOT EXISTS telefones_transporte (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
