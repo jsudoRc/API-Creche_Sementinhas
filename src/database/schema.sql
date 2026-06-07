@@ -105,5 +105,14 @@ CREATE TABLE IF NOT EXISTS alunos_responsaveis (
     PRIMARY KEY (aluno_id,responsavel_id)
 );
 
+CREATE TABLE IF NOT EXISTS alunos_transporte (
+    aluno_id INTEGER NOT NULL,
+    transporte_id INTEGER NOT NULL,
+
+    FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE,
+    FOREIGN KEY (transporte_id) REFERENCES responsaveis_transporte(id) ON DELETE CASCADE,
+
+    PRIMARY KEY (aluno_id,transporte_id)
+);
 
 
