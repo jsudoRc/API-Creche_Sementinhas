@@ -1,0 +1,140 @@
+### Listar todos os funcionários (Deve trazer a Tia Maria e o Tio João do nosso seed)
+GET http://localhost:3000/funcionarios
+
+### Criar uma nova professora
+POST http://localhost:3000/funcionarios
+Content-Type: application/json
+
+{
+    "nome": "Tia Roberta",
+    "email": "roberta@sementinhas.com",
+    "senha": "senhaforte123"
+}
+
+### Teste de Falha (Zod) - Tentar criar funcionário com e-mail inválido
+POST http://localhost:3000/funcionarios
+Content-Type: application/json
+
+{
+    "nome": "Hacker da Silva",
+    "email": "email-invalido",
+    "senha": "123"
+}
+
+
+### ==========================================
+### 2. TURMAS (Organização)
+### ==========================================
+
+### Listar Turmas
+GET http://localhost:3000/turmas
+
+
+### ==========================================
+### 3. ALUNOS (A Ficha de Anamnese)
+### ==========================================
+
+### Criar um novo Aluno (Vinculado à Turma 1 e Funcionário 1)
+POST http://localhost:3000/alunos
+Content-Type: application/json
+
+{
+    "nome": "Enzo Gabriel",
+    "data_nasc": "2023-05-15",
+    "andarilha": 1,
+    "autorizacao_img": 1,
+    "turma_id": 1,
+    "funcionario_id": 2,
+    "observacoes": "Alergia a amendoim"
+}
+
+
+### Listar Alunos (Deve mostrar o Enzo)
+GET http://localhost:3000/alunos
+
+### Atualizar dados do Aluno (Exemplo: Enzo fez uma cirurgia)
+PUT http://localhost:3000/alunos/1
+Content-Type: application/json
+
+{
+    "cirurgia_qual": "Retirada de amígdalas",
+    "cirurgia_tempo": "2 meses atrás"
+}
+
+
+### ==========================================
+### 4. RESPONSÁVEIS PRINCIPAIS
+### ==========================================
+
+### Cadastrar o Pai do Enzo
+POST http://localhost:3000/responsaveis
+Content-Type: application/json
+
+{
+    "nome": "Carlos Gabriel",
+    "cpf": "12345678901",
+    "cep": "13330000",
+    "parentesco": "Pai",
+    "profissao": "Engenheiro",
+    "responsavel_finance": 1
+}
+
+### Listar Responsáveis
+GET http://localhost:3000/responsaveis
+
+
+### ==========================================
+### 5. MATRÍCULA (O Contrato Físico)
+### ==========================================
+
+### Gerar a Matrícula do Enzo (Aluno ID 1)
+POST http://localhost:3000/matriculas
+Content-Type: application/json
+
+{
+    "plano": "Integral",
+    "valor_mensalidade": 850.50,
+    "data_venc": 10,
+    "inicio_vigencia": "2026-06-01",
+    "fim_vigencia": "2026-12-15",
+    "forma_pagamento": "PIX",
+    "aluno_id": 1
+}
+
+### Listar Matrículas
+GET http://localhost:3000/matriculas
+
+
+### ==========================================
+### 6. EXTRAS (Transporte, Emergência, Arquivos)
+### ==========================================
+
+### Cadastrar o Tio da Van (Transporte)
+POST http://localhost:3000/responsaveis-transporte
+Content-Type: application/json
+
+{
+    "nome": "Tio Valdir (Van)",
+    "rg": "12345678X",
+    "parentesco": "Motorista Contratado"
+}
+
+### Cadastrar Contato de Emergência (Avó)
+POST http://localhost:3000/contatos-emergencia
+Content-Type: application/json
+
+{
+    "nome": "Dona Lourdes Pereira",
+    "rg": "9876543212",
+    "parentesco": "Avó Materna"
+}
+
+### Cadastrar Arquivo Físico (PDF do Contrato)
+POST http://localhost:3000/arquivos
+Content-Type: application/json
+
+{
+    "caminho_arquivo": "/uploads/contratos/enzo_gabriel_2026.pdf",
+    "tipo_arquivo": "Contrato Assinado",
+    "aluno_id": 1
+}
