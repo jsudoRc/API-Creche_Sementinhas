@@ -1,24 +1,16 @@
-// Criando tabela de turmas para creche
+-- ==========================================
+-- 1. TABELAS BASE (Não dependem de nenhuma outra)
+-- ==========================================
 CREATE TABLE IF NOT EXISTS turmas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome VARCHAR(80) NOT NULL,
-    idade_max INT NOT NULL,
-    idade_min INT NOT NULL,
-    capacidade INT NOT NULL,
-    valor_mensal DECIMAL(10, 2) NOT NULL,
-    periodo VARCHAR(20) NOT NULL
+    nome TEXT NOT NULL,
+    idade_max INTEGER NOT NULL,
+    idade_min INTEGER NOT NULL,
+    capacidade INTEGER NOT NULL,
+    valor_mensal REAL NOT NULL,
+    periodo TEXT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS arquivos(
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      caminho_arquivo TEXT NOT NULL,
-      tipo_arquivo TEXT NOT NULL,
-      data_upload TEXT DEFAULT CURRENT_TIMESTAMP,
 
-      aluno_id INTEGER NOT NULL,
-      FOREIGN KEY (aluno_id) REFERENCES alunos(id)
-
-);
---TABELA FUNCIONÁRIO
 CREATE TABLE IF NOT EXISTS funcionarios(
      id INTEGER PRIMARY KEY AUTOINCREMENT,
      nome TEXT NOT NULL,
@@ -26,11 +18,90 @@ CREATE TABLE IF NOT EXISTS funcionarios(
      senha TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS responsaveis(
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       nome TEXT NOT NULL,
+       cpf TEXT NOT NULL UNIQUE,
+       cep TEXT NOT NULL,
+       parentesco TEXT NOT NULL,
+       profissao TEXT,
+       responsavel_finance INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS responsaveis_transporte(
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+       nome TEXT NOT NULL,
+       rg TEXT NOT NULL UNIQUE,
+       parentesco TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS contato_emergencia(
        id INTEGER PRIMARY KEY AUTOINCREMENT,
        nome TEXT NOT NULL,
        rg TEXT NOT NULL UNIQUE,
        parentesco TEXT NOT NULL
+);
+
+-- ==========================================
+-- 2. TABELAS DE NÍVEL 1 (Dependem das tabelas Base)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS alunos (
+     id INTEGER PRIMARY KEY AUTOINCREMENT,
+     nome TEXT NOT NULL,
+     data_nasc TEXT NOT NULL,
+     andarilha INTEGER DEFAULT 0,
+     autorizacao_img INTEGER DEFAULT 0,
+     sexo TEXT,
+     receita_antitermico TEXT,
+     cirurgia_qual TEXT,
+     cirurgia_tempo TEXT,
+     observacoes TEXT,
+
+    turma_id INTEGER NOT NULL,
+    funcionario_id INTEGER NOT NULL,
+    
+    FOREIGN KEY (turma_id) REFERENCES turmas(id),
+    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)
+);
+
+CREATE TABLE IF NOT EXISTS telefones_responsaveis (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero TEXT NOT NULL,
+    responsavel_id INTEGER NOT NULL,
+    FOREIGN KEY (responsavel_id) REFERENCES responsaveis(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS emails_responsaveis (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    responsavel_id INTEGER NOT NULL,
+    FOREIGN KEY (responsavel_id) REFERENCES responsaveis(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS telefones_transporte (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero TEXT NOT NULL,
+    transporte_id INTEGER NOT NULL,
+    FOREIGN KEY (transporte_id) REFERENCES responsaveis_transporte(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS telefones_emergencia (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    numero TEXT NOT NULL,
+    emergencia_id INTEGER NOT NULL,
+    FOREIGN KEY (emergencia_id) REFERENCES contato_emergencia(id) ON DELETE CASCADE
+);
+
+-- ==========================================
+-- 3. TABELAS DE NÍVEL 2 (Dependem da tabela Alunos)
+-- ==========================================
+CREATE TABLE IF NOT EXISTS arquivos(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      caminho_arquivo TEXT NOT NULL,
+      tipo_arquivo TEXT NOT NULL,
+      data_upload TEXT DEFAULT CURRENT_TIMESTAMP,
+      aluno_id INTEGER NOT NULL,
+      FOREIGN KEY (aluno_id) REFERENCES alunos(id)
 );
 
 CREATE TABLE IF NOT EXISTS matriculas(
@@ -42,113 +113,33 @@ CREATE TABLE IF NOT EXISTS matriculas(
        fim_vigencia TEXT NOT NULL,
        forma_pagamento TEXT NOT NULL, 
        data_saida TEXT,
-
        aluno_id INTEGER NOT NULL,
        FOREIGN KEY (aluno_id) REFERENCES alunos(id)
-
 );
 
-CREATE TABLE IF NOT EXISTS responsaveis_transporte(
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       nome TEXT NOT NULL,
-       rg TEXT NOT NULL UNIQUE,
-       parentesco TEXT NOT NULL
-
-);
-
-CREATE TABLE IF NOT EXISTS alunos (
-     id INTEGER PRIMARY KEY AUTOINCREMENT,
-     nome TEXT NOT NULL ,
-     data_nasc TEXT NOT NULL,
-     andarilha INTEGER DEFAULT 0,
-     autorizacao_img INTEGER DEFAULT 0,
-     sexo TEXT,
-     receita_antitermico TEXT ,
-     cirurgia_qual TEXT,
-     cirurgia_tempo TEXT,
-     observacoes TEXT,
-
-
-    turma_id INTEGER NOT NULL,
-    funcionario_id INTEGER NOT NULL,
-
-    
-    FOREIGN KEY (turma_id) REFERENCES turmas(id),
-    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)
-);
-
-CREATE TABLE IF NOT EXISTS responsaveis(
-
-       id INTEGER PRIMARY KEY AUTOINCREMENT ,
-       nome TEXT NOT NULL,
-       cpf TEXT NOT NULL UNIQUE,
-       cep TEXT NOT NULL,
-       parentesco TEXT NOT NULL,
-       profissao TEXT,
-       responsavel_finance INTEGER DEFAULT 0
-);
-
--- Telefones e E-mails dos Responsáveis Principais
-CREATE TABLE IF NOT EXISTS telefones_responsaveis (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    numero TEXT NOT NULL,
-    
-    responsavel_id INTEGER NOT NULL,
-    FOREIGN KEY (responsavel_id) REFERENCES responsaveis(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS emails_responsaveis (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL,
-    
-    responsavel_id INTEGER NOT NULL,
-    FOREIGN KEY (responsavel_id) REFERENCES responsaveis(id) ON DELETE CASCADE
-);
-
--- Telefones do Transporte e Emergência
-CREATE TABLE IF NOT EXISTS telefones_transporte (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    numero TEXT NOT NULL,
-    
-    transporte_id INTEGER NOT NULL,
-    FOREIGN KEY (transporte_id) REFERENCES responsaveis_transporte(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS telefones_emergencia (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    numero TEXT NOT NULL,
-    
-    emergencia_id INTEGER NOT NULL,
-    FOREIGN KEY (emergencia_id) REFERENCES contato_emergencia(id) ON DELETE CASCADE
-);
-
- --Tabelas associativas 
+-- ==========================================
+-- 4. TABELAS ASSOCIATIVAS
+-- ==========================================
 CREATE TABLE IF NOT EXISTS alunos_responsaveis (
     aluno_id INTEGER NOT NULL,
     responsavel_id INTEGER NOT NULL,
-
     FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE,
     FOREIGN KEY (responsavel_id) REFERENCES responsaveis(id) ON DELETE CASCADE,
-
-    PRIMARY KEY (aluno_id,responsavel_id)
+    PRIMARY KEY (aluno_id, responsavel_id)
 );
 
 CREATE TABLE IF NOT EXISTS alunos_transporte (
     aluno_id INTEGER NOT NULL,
     transporte_id INTEGER NOT NULL,
-
     FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE,
     FOREIGN KEY (transporte_id) REFERENCES responsaveis_transporte(id) ON DELETE CASCADE,
-
-    PRIMARY KEY (aluno_id,transporte_id)
+    PRIMARY KEY (aluno_id, transporte_id)
 );
 
 CREATE TABLE IF NOT EXISTS alunos_emergencia (
     aluno_id INTEGER NOT NULL,
     emergencia_id INTEGER NOT NULL,
-    
     FOREIGN KEY (aluno_id) REFERENCES alunos(id) ON DELETE CASCADE,
     FOREIGN KEY (emergencia_id) REFERENCES contato_emergencia(id) ON DELETE CASCADE,
     PRIMARY KEY (aluno_id, emergencia_id)
 );
-
