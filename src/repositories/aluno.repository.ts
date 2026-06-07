@@ -31,19 +31,19 @@ export const alunoRepository = {
     create(input: CreateAlunoInput): Promise<Aluno> {
         return new Promise((resolve, reject) => {
             const { 
-                nome, data_nasc, andarilha, autorizacao_img, sexo, 
+                nome, data_nasc, andarilha, cpf, autorizacao_img, sexo, 
                 receita_antitermico, cirurgia_qual, cirurgia_tempo, observacoes, 
                 turma_id, funcionario_id 
             } = input;
             
             db.run(
                 `INSERT INTO alunos (
-                    nome, data_nasc, andarilha, autorizacao_img, sexo, 
+                    nome, data_nasc, andarilha, cpf, autorizacao_img, sexo, 
                     receita_antitermico, cirurgia_qual, cirurgia_tempo, observacoes, 
                     turma_id, funcionario_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    nome, data_nasc, andarilha, autorizacao_img, sexo, 
+                    nome, data_nasc, andarilha, cpf, autorizacao_img, sexo, 
                     receita_antitermico, cirurgia_qual, cirurgia_tempo, observacoes, 
                     turma_id, funcionario_id
                 ],
@@ -62,6 +62,7 @@ export const alunoRepository = {
 
             if (input.nome !== undefined) { fields.push('nome = ?'); values.push(input.nome); }
             if (input.data_nasc !== undefined) { fields.push('data_nasc = ?'); values.push(input.data_nasc); }
+            if (input.cpf !== undefined) { fields.push('cpf = ?'); values.push(input.cpf); }
             if (input.andarilha !== undefined) { fields.push('andarilha = ?'); values.push(input.andarilha); }
             if (input.autorizacao_img !== undefined) { fields.push('autorizacao_img = ?'); values.push(input.autorizacao_img); }
             if (input.sexo !== undefined) { fields.push('sexo = ?'); values.push(input.sexo); }
