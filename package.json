@@ -23,11 +23,13 @@
   },
   "homepage": "https://github.com/jsudoRc/API-Creche_Sementinhas#readme",
   "dependencies": {
+    "cors": "^2.8.6",
     "express": "^5.2.1",
     "sqlite3": "^6.0.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.1",
     "tsx": "^4.22.4",
