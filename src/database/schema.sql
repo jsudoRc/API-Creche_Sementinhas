@@ -46,23 +46,25 @@ CREATE TABLE IF NOT EXISTS contato_emergencia(
 -- 2. TABELAS DE NÍVEL 1 (Dependem das tabelas Base)
 -- ==========================================
 CREATE TABLE IF NOT EXISTS alunos (
-     id INTEGER PRIMARY KEY AUTOINCREMENT,
-     nome TEXT NOT NULL,
-     data_nasc TEXT NOT NULL,
-     andarilha INTEGER DEFAULT 0,
-     autorizacao_img INTEGER DEFAULT 0,
-     sexo TEXT,
-     receita_antitermico TEXT,
-     cirurgia_qual TEXT,
-     cirurgia_tempo TEXT,
-     observacoes TEXT,
+     id                     INTEGER PRIMARY KEY AUTOINCREMENT,
+     nome                   VARCHAR (150)   NOT NULL ,
+     data_nasc              VARCHAR (10)    NOT NULL,
+     CPF                    VARCHAR (14)    NOT NULL UNIQUE,
+     andarilha              INTEGER         DEFAULT 0,
+     autorizacao_img        VARCHAR (250)   NULL,
+     sexo                   VARCHAR (10)    NOT NULL,
+     receita_antitermico    VARCHAR (250)   NULL,
+     cirurgia_qual          VARCHAR (250)   NULL,
+     cirurgia_tempo         VARCHAR (250)   NULL,
+     observacoes            TEXT            NULL,
 
     turma_id INTEGER NOT NULL,
     funcionario_id INTEGER NOT NULL,
-    
+
     FOREIGN KEY (turma_id) REFERENCES turmas(id),
     FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)
 );
+
 
 CREATE TABLE IF NOT EXISTS telefones_responsaveis (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
