@@ -3,7 +3,7 @@ import {
     Aluno, 
     CreateAlunoInput, 
     UpdateAlunoInput 
-} from '../models/aluno.models';
+} from '../models/aluno.model';
 
 export const alunoRepository = {
     findAll(): Promise<Aluno[]> {
