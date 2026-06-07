@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-// Schema de criação
-export const createTurmaSchema = z.object({
+// 1. Criamos um esqueleto PURO apenas com as validações de campo
+const baseTurmaSchema = z.object({
     nome: z
         .string()
         .min(1, 'O nome da turma é obrigatório.'),
@@ -31,7 +31,10 @@ export const createTurmaSchema = z.object({
             message: 'O período deve ser manhã, tarde ou integral.'
         }
     ),
-}).refine(
+});
+
+// 2. Schema de criação: Pega o esqueleto puro e adiciona o refine
+export const createTurmaSchema = baseTurmaSchema.refine(
     (data) => data.idade_min <= data.idade_max,
     {
         message: 'A idade mínima deve ser menor ou igual à idade máxima.',
@@ -39,8 +42,8 @@ export const createTurmaSchema = z.object({
     }
 );
 
-// Schema de atualização
-export const updateTurmaSchema = createTurmaSchema
+// 3. Schema de atualização: Pega o esqueleto puro, aplica o partial() e DEPOIS o superRefine
+export const updateTurmaSchema = baseTurmaSchema
     .partial()
     .superRefine((data, ctx) => {
         if (
