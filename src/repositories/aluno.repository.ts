@@ -32,19 +32,43 @@ export const alunoRepository = {
         return new Promise((resolve, reject) => {
             const { 
                 nome, data_nasc, andarilha, cpf, autorizacao_img, sexo, 
-                receita_antitermico, cirurgia_qual, cirurgia_tempo, observacoes, 
+                receita_antitermico, cirurgia_qual, cirurgia_tempo, observacoes,
+                foto, problema_saude, problema_saude_qual, alergia, alergia_qual,
+                medicacao_continua, medicacao_qual, medicacao_tempo, fratura,
+                fratura_qual, fratura_tempo, mamadeira, formula_qual,
+                formula_quantidade_ml, chupeta, fralda, restricao_alimentar,
+                restricao_descricao, cep, endereco, bairro, complemento,
                 turma_id, funcionario_id 
             } = input;
             
             db.run(
                 `INSERT INTO alunos (
-                    nome, data_nasc, andarilha, cpf, autorizacao_img, sexo, 
-                    receita_antitermico, cirurgia_qual, cirurgia_tempo, observacoes, 
+                    nome, data_nasc, andarilha, cpf, autorizacao_img, sexo,
+                    receita_antitermico, cirurgia_qual, cirurgia_tempo, observacoes,
+                    foto, problema_saude, problema_saude_qual, alergia, alergia_qual,
+                    medicacao_continua, medicacao_qual, medicacao_tempo, fratura,
+                    fratura_qual, fratura_tempo, mamadeira, formula_qual,
+                    formula_quantidade_ml, chupeta, fralda, restricao_alimentar,
+                    restricao_descricao, cep, endereco, bairro, complemento,
                     turma_id, funcionario_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                ) VALUES (
+                    ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?,
+                    ?, ?
+                )`,
                 [
-                    nome, data_nasc, andarilha, cpf, autorizacao_img, sexo, 
-                    receita_antitermico, cirurgia_qual, cirurgia_tempo, observacoes, 
+                    nome, data_nasc, andarilha, cpf, autorizacao_img, sexo,
+                    receita_antitermico, cirurgia_qual, cirurgia_tempo, observacoes,
+                    foto, problema_saude, problema_saude_qual, alergia, alergia_qual,
+                    medicacao_continua, medicacao_qual, medicacao_tempo, fratura,
+                    fratura_qual, fratura_tempo, mamadeira, formula_qual,
+                    formula_quantidade_ml, chupeta, fralda, restricao_alimentar,
+                    restricao_descricao, cep, endereco, bairro, complemento,
                     turma_id, funcionario_id
                 ],
                 function (err) {
@@ -70,6 +94,28 @@ export const alunoRepository = {
             if (input.cirurgia_qual !== undefined) { fields.push('cirurgia_qual = ?'); values.push(input.cirurgia_qual); }
             if (input.cirurgia_tempo !== undefined) { fields.push('cirurgia_tempo = ?'); values.push(input.cirurgia_tempo); }
             if (input.observacoes !== undefined) { fields.push('observacoes = ?'); values.push(input.observacoes); }
+            if (input.foto !== undefined) { fields.push('foto = ?'); values.push(input.foto); }
+            if (input.problema_saude !== undefined) { fields.push('problema_saude = ?'); values.push(input.problema_saude); }
+            if (input.problema_saude_qual !== undefined) { fields.push('problema_saude_qual = ?'); values.push(input.problema_saude_qual); }
+            if (input.alergia !== undefined) { fields.push('alergia = ?'); values.push(input.alergia); }
+            if (input.alergia_qual !== undefined) { fields.push('alergia_qual = ?'); values.push(input.alergia_qual); }
+            if (input.medicacao_continua !== undefined) { fields.push('medicacao_continua = ?'); values.push(input.medicacao_continua); }
+            if (input.medicacao_qual !== undefined) { fields.push('medicacao_qual = ?'); values.push(input.medicacao_qual); }
+            if (input.medicacao_tempo !== undefined) { fields.push('medicacao_tempo = ?'); values.push(input.medicacao_tempo); }
+            if (input.fratura !== undefined) { fields.push('fratura = ?'); values.push(input.fratura); }
+            if (input.fratura_qual !== undefined) { fields.push('fratura_qual = ?'); values.push(input.fratura_qual); }
+            if (input.fratura_tempo !== undefined) { fields.push('fratura_tempo = ?'); values.push(input.fratura_tempo); }
+            if (input.mamadeira !== undefined) { fields.push('mamadeira = ?'); values.push(input.mamadeira); }
+            if (input.formula_qual !== undefined) { fields.push('formula_qual = ?'); values.push(input.formula_qual); }
+            if (input.formula_quantidade_ml !== undefined) { fields.push('formula_quantidade_ml = ?'); values.push(input.formula_quantidade_ml); }
+            if (input.chupeta !== undefined) { fields.push('chupeta = ?'); values.push(input.chupeta); }
+            if (input.fralda !== undefined) { fields.push('fralda = ?'); values.push(input.fralda); }
+            if (input.restricao_alimentar !== undefined) { fields.push('restricao_alimentar = ?'); values.push(input.restricao_alimentar); }
+            if (input.restricao_descricao !== undefined) { fields.push('restricao_descricao = ?'); values.push(input.restricao_descricao); }
+            if (input.cep !== undefined) { fields.push('cep = ?'); values.push(input.cep); }
+            if (input.endereco !== undefined) { fields.push('endereco = ?'); values.push(input.endereco); }
+            if (input.bairro !== undefined) { fields.push('bairro = ?'); values.push(input.bairro); }
+            if (input.complemento !== undefined) { fields.push('complemento = ?'); values.push(input.complemento); }
             if (input.turma_id !== undefined) { fields.push('turma_id = ?'); values.push(input.turma_id); }
             if (input.funcionario_id !== undefined) { fields.push('funcionario_id = ?'); values.push(input.funcionario_id); }
 
