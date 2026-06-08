@@ -46,12 +46,9 @@ export const alunoService = {
     const aluno = await this.getById(id);
 
     // Deleta os arquivos físicos se existirem
-    if (aluno.autorizacao_img) {
-      fs.unlink(aluno.autorizacao_img, () => {});
-    }
-    if (aluno.receita_antitermico) {
-      fs.unlink(aluno.receita_antitermico, () => {});
-    }
+    if (aluno.autorizacao_img) fs.unlink(aluno.autorizacao_img, () => {});
+    if (aluno.receita_antitermico) fs.unlink(aluno.receita_antitermico, () => {});
+    if (aluno.foto) fs.unlink(aluno.foto, () => {});
 
     await alunoRepository.delete(id);
   },
