@@ -4,7 +4,7 @@ API REST para gerenciamento de uma creche, desenvolvida com Node.js, TypeScript,
 
 ## 👥 Integrantes
 
-- Vitor
+- Victor
 - Ezequiel
 - Gabriel Cruz
 - Jonas
