@@ -3,25 +3,44 @@ import axios from 'axios';
 // ==========================================
 // 1. CONFIGURAÇÃO BASE DO AXIOS
 // ==========================================
+
+// Em desenvolvimento, VITE_API_URL deve ser http://localhost:3000
+// Em produção (Render), VITE_API_URL deve ser https://api-creche-sementinhas.onrender.com
+const BASE_URL = import.meta.env.VITE_API_URL;
+
+if (!BASE_URL) {
+  console.error(
+    '[api.ts] VITE_API_URL não definida. Crie o arquivo frontend/.env com:\n' +
+    'VITE_API_URL=http://localhost:3000'
+  );
+}
+
 export const api = axios.create({
-  baseURL: 'https://api-creche-sementinhas.onrender.com/',
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Opcional: Interceptor para adicionar Token de Autenticação nas requisições
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); // Ajuste conforme sua estratégia de auth
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Interceptor de resposta: exibe erros de rede de forma centralizada no console
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      // Erro retornado pelo servidor (4xx, 5xx)
+      console.error(`[API] Erro ${error.response.status}:`, error.response.data);
+    } else if (error.request) {
+      // Requisição feita mas sem resposta (backend offline, CORS, etc.)
+      console.error('[API] Sem resposta do servidor. Verifique se o backend está rodando.');
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 // ==========================================
-// 2. INTERFACES (Baseadas no seu banco de dados)
+// 2. INTERFACES (Espelho exato dos models do backend)
 // ==========================================
+
 export interface Turma {
   id: number;
   nome: string;
@@ -29,27 +48,52 @@ export interface Turma {
   idade_min: number;
   capacidade: number;
   valor_mensal: number;
-  periodo: string;
+  periodo: 'manhã' | 'tarde' | 'integral'; // enum igual ao backend
 }
 
 export interface Funcionario {
   id: number;
   nome: string;
   email: string;
-  senha?: string; // Opcional no front para não expor acidentalmente
+  senha?: string; // opcional no front para não expor o hash acidentalmente
 }
 
+// Interface espelho do model Aluno do backend (src/models/aluno.model.ts)
+// Todos os 34 campos presentes no banco estão aqui
 export interface Aluno {
   id: number;
   nome: string;
   data_nasc: string;
-  andarilha: number;
-  autorizacao_img: number;
-  sexo: string | null;
-  receita_antitermico: string | null;
+  cpf: string;
+  andarilha: number;                       // 0 ou 1 (SQLite não tem boolean)
+  autorizacao_img: string | null;          // caminho do arquivo ou null
+  sexo: 'Masculino' | 'Feminino';
+  receita_antitermico: string | null;      // caminho do arquivo ou null
   cirurgia_qual: string | null;
   cirurgia_tempo: string | null;
   observacoes: string | null;
+  foto: string | null;                     // caminho do arquivo ou null
+  problema_saude: number;                  // 0 ou 1
+  problema_saude_qual: string | null;
+  alergia: number;                         // 0 ou 1
+  alergia_qual: string | null;
+  medicacao_continua: number;              // 0 ou 1
+  medicacao_qual: string | null;
+  medicacao_tempo: string | null;
+  fratura: number;                         // 0 ou 1
+  fratura_qual: string | null;
+  fratura_tempo: string | null;
+  mamadeira: number;                       // 0 ou 1
+  formula_qual: string | null;
+  formula_quantidade_ml: string | null;
+  chupeta: number;                         // 0 ou 1
+  fralda: number;                          // 0 ou 1
+  restricao_alimentar: number;             // 0 ou 1
+  restricao_descricao: string | null;
+  cep: string | null;
+  endereco: string | null;
+  bairro: string | null;
+  complemento: string | null;
   turma_id: number;
   funcionario_id: number;
 }
@@ -61,7 +105,7 @@ export interface Responsavel {
   cep: string;
   parentesco: string;
   profissao: string | null;
-  responsavel_finance: number;
+  responsavel_finance: number; // 0 ou 1
 }
 
 export interface ResponsavelTransporte {
@@ -94,14 +138,13 @@ export interface Arquivo {
   id: number;
   caminho_arquivo: string;
   tipo_arquivo: string;
-  data_upload: string;
+  data_upload: string; // gerado automaticamente pelo banco
   aluno_id: number;
 }
 
 // ==========================================
 // 3. FUNÇÃO GENÉRICA DE CRUD
 // ==========================================
-// Esta função cria todos os verbos HTTP padrão para qualquer rota
 function createCrudService<T>(resource: string) {
   return {
     getAll: () => api.get<T[]>(`/${resource}`),
@@ -113,7 +156,7 @@ function createCrudService<T>(resource: string) {
 }
 
 // ==========================================
-// 4. SERVIÇOS EXPORTADOS (Endpoints)
+// 4. SERVIÇOS EXPORTADOS (um por rota da API)
 // ==========================================
 export const TurmaService = createCrudService<Turma>('turmas');
 export const FuncionarioService = createCrudService<Funcionario>('funcionarios');
@@ -123,20 +166,18 @@ export const MatriculaService = createCrudService<Matricula>('matriculas');
 export const ResponsavelTransporteService = createCrudService<ResponsavelTransporte>('responsaveis-transporte');
 export const ContatoEmergenciaService = createCrudService<ContatoEmergencia>('contatos-emergencia');
 
-// Serviço de Arquivos (Com método extra para upload de arquivos reais)
+// Serviço de Arquivos com método extra para upload multipart/form-data
 export const ArquivoService = {
   ...createCrudService<Arquivo>('arquivos'),
-  
-  // Método específico para upload usando multipart/form-data
-  upload: (alunoId: number, file: File) => {
+
+  // Usado ao enviar foto, autorizacao_img ou receita_antitermico via formulário
+  upload: (alunoId: number, file: File, campo: 'foto' | 'autorizacao_img' | 'receita_antitermico') => {
     const formData = new FormData();
-    formData.append('arquivo', file); // O nome do campo deve bater com o que o multer (ou similar) espera no Node
+    formData.append(campo, file); // nome do campo deve bater com o upload.fields() do multer no backend
     formData.append('aluno_id', String(alunoId));
 
     return api.post<Arquivo>('/arquivos', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
 };
