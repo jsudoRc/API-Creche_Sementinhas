@@ -47,22 +47,53 @@ CREATE TABLE IF NOT EXISTS contato_emergencia(
 -- ==========================================
 CREATE TABLE IF NOT EXISTS alunos (
      id                     INTEGER PRIMARY KEY AUTOINCREMENT,
-     nome                   VARCHAR (150)   NOT NULL ,
+     nome                   VARCHAR (150)   NOT NULL,
      data_nasc              VARCHAR (10)    NOT NULL,
      CPF                    VARCHAR (14)    NOT NULL UNIQUE,
      andarilha              INTEGER         DEFAULT 0,
-     autorizacao_img        VARCHAR (250)   NULL,
+     autorizacao_img        VARCHAR (500)   NULL,
      sexo                   VARCHAR (10)    NOT NULL,
-     receita_antitermico    VARCHAR (250)   NULL,
+     receita_antitermico    VARCHAR (500)   NULL,
      cirurgia_qual          VARCHAR (250)   NULL,
      cirurgia_tempo         VARCHAR (250)   NULL,
      observacoes            TEXT            NULL,
+     foto                   VARCHAR (500)   NULL,
+     problema_saude         INTEGER         DEFAULT 0,
+     problema_saude_qual    VARCHAR (255)   NULL,
+     alergia                INTEGER         DEFAULT 0,
+     alergia_qual           VARCHAR (255)   NULL,
+     medicacao_continua     INTEGER         DEFAULT 0,
+     medicacao_qual         VARCHAR (255)   NULL,
+     medicacao_tempo        VARCHAR (100)   NULL,
+     fratura                INTEGER         DEFAULT 0,
+     fratura_qual           VARCHAR (255)   NULL,
+     fratura_tempo          VARCHAR (100)   NULL,
+     mamadeira              INTEGER         DEFAULT 0,
+     formula_qual           VARCHAR (255)   NULL,
+     formula_quantidade_ml  VARCHAR (50)    NULL,
+     chupeta                INTEGER         DEFAULT 0,
+     fralda                 INTEGER         DEFAULT 0,
+     restricao_alimentar    INTEGER         DEFAULT 0,
+     restricao_descricao    TEXT            NULL,
+     cep                    VARCHAR (9)     NULL,
+     endereco               VARCHAR (255)   NULL,
+     bairro                 VARCHAR (100)   NULL,
+     complemento            VARCHAR (100)   NULL,
 
-    turma_id INTEGER NOT NULL,
-    funcionario_id INTEGER NOT NULL,
+     turma_id               INTEGER         NOT NULL,
+     funcionario_id         INTEGER         NOT NULL,
 
-    FOREIGN KEY (turma_id) REFERENCES turmas(id),
-    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)
+     CONSTRAINT fk_alunos_turma
+         FOREIGN KEY (turma_id)
+         REFERENCES turmas(id)
+         ON DELETE RESTRICT
+         ON UPDATE CASCADE,
+
+     CONSTRAINT fk_alunos_funcionario
+         FOREIGN KEY (funcionario_id)
+         REFERENCES funcionarios(id)
+         ON DELETE RESTRICT
+         ON UPDATE CASCADE
 );
 
 
