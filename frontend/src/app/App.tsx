@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Users, UserPlus, BookOpen, Calendar, FileText, Menu, Baby } from 'lucide-react';
-import Dashboard from './components/Dashboard';
-import CadastroAluno from './components/CadastroAluno';
-import ListaAlunos from './components/ListaAlunos';
-import Turmas from './components/Turmas';
+import Dashboard from './pages/Dashboard';
+import CadastroAluno from './pages/CadastroAluno';
+import ListaAlunos from './pages/ListaAlunos';
+import Turmas from './pages/Turmas';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');

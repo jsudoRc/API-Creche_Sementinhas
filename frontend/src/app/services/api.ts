@@ -4,7 +4,7 @@ import axios from 'axios';
 // 1. CONFIGURAÇÃO BASE DO AXIOS
 // ==========================================
 export const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'https://api-creche-sementinhas.onrender.com/',
   headers: {
     'Content-Type': 'application/json',
   },
