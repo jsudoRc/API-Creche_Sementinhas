@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS funcionarios(
      senha TEXT NOT NULL,
      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-     status INTEGER DEFAULT 1,
+     status INTEGER DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS responsaveis(
