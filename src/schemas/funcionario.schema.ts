@@ -7,3 +7,8 @@ export const createFuncionarioSchema = z.object({
 });
 
 export const updateFuncionarioSchema = createFuncionarioSchema.partial();
+
+export const loginFuncionarioSchema = z.object({
+    email: z.string().email('Formato de e-mail inválido.'),
+    senha: z.string().min(1, 'A senha é obrigatória.'),
+});
