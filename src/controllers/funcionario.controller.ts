@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { funcionarioService } from '../services/funcionario.service';
-import { createFuncionarioSchema, updateFuncionarioSchema } from '../schemas/funcionario.schema';
+import { createFuncionarioSchema, loginFuncionarioSchema, updateFuncionarioSchema } from '../schemas/funcionario.schema';
 
 export const funcionarioController = {
   async list(_req: Request, res: Response, next: NextFunction) {
@@ -23,6 +23,15 @@ export const funcionarioController = {
     try {
       const data = createFuncionarioSchema.parse(req.body);
       res.status(201).json(await funcionarioService.create(data));
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async login(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = loginFuncionarioSchema.parse(req.body);
+      res.json(await funcionarioService.login(data.email, data.senha));
     } catch (err) {
       next(err);
     }

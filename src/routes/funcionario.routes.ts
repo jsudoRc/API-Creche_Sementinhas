@@ -3,6 +3,7 @@ import { funcionarioController } from '../controllers/funcionario.controller';
 
 const router = Router();
 
+router.post('/login', funcionarioController.login);
 router.get('/', funcionarioController.list);
 router.get('/:id', funcionarioController.getById);
 router.post('/', funcionarioController.create);

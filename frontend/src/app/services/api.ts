@@ -158,6 +158,9 @@ function createCrudService<T, TCreate = Omit<T, 'id'>>(resource: string) {
 // ==========================================
 export const TurmaService = createCrudService<Turma>('turmas');
 export const FuncionarioService = createCrudService<Funcionario>('funcionarios');
+export const AuthService = {
+  login: (email: string, senha: string) => api.post<Omit<Funcionario, 'senha'>>('/funcionarios/login', { email, senha }),
+};
 export const AlunoService = createCrudService<Aluno>('alunos');
 export const ResponsavelService = createCrudService<Responsavel>('responsaveis');
 export const MatriculaService = createCrudService<Matricula>('matriculas');

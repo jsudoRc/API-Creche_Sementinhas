@@ -216,6 +216,14 @@ const swaggerOptions: Options = {
         FuncionarioUpdate: {
           allOf: [{ $ref: '#/components/schemas/FuncionarioInput' }],
         },
+        LoginInput: {
+          type: 'object',
+          required: ['email', 'senha'],
+          properties: {
+            email: { type: 'string', example: 'teste@sementinhas.com' },
+            senha: { type: 'string', example: '123456' },
+          },
+        },
         Aluno: {
           type: 'object',
           properties: {
@@ -387,6 +395,32 @@ const swaggerOptions: Options = {
       },
     },
     paths: {
+      '/funcionarios/login': {
+        post: {
+          tags: ['Funcionários'],
+          summary: 'Login de funcionário',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/LoginInput' },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: 'Login realizado com sucesso.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/Funcionario' },
+                },
+              },
+            },
+            400: commonResponses.ValidationError,
+            401: commonResponses.ValidationError,
+          },
+        },
+      },
       ...crudPaths('Turmas', 'Turma', '/turmas', 'turmas'),
       ...crudPaths('Funcionários', 'Funcionario', '/funcionarios', 'funcionários'),
       ...crudPaths('Alunos', 'Aluno', '/alunos', 'alunos'),

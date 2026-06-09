@@ -29,6 +29,12 @@ db.serialize(() => {
 
   // 3. Inserimos alguns Funcionários (O schema deles continuou igual)
   db.run('INSERT INTO funcionarios (nome, email, senha) VALUES (?, ?, ?)', [
+    'Funcionário Teste',
+    'teste@sementinhas.com',
+    '123456',
+  ]);
+
+  db.run('INSERT INTO funcionarios (nome, email, senha) VALUES (?, ?, ?)', [
     'Tia Maria',
     'maria@sementinhas.com',
     'senha123', // Em um sistema real, essa senha seria criptografada!

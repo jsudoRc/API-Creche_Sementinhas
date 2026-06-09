@@ -27,6 +27,17 @@ export const funcionarioService = {
     return funcionarioRepository.create(input);
   },
 
+  async login(email: string, senha: string) {
+    const funcionario = await funcionarioRepository.findByEmail(email);
+
+    if (!funcionario || funcionario.senha !== senha) {
+      throw new AppError('E-mail ou senha inválidos', 401);
+    }
+
+    const { senha: _senha, ...funcionarioSemSenha } = funcionario;
+    return funcionarioSemSenha;
+  },
+
   async update(id: number, input: UpdateFuncionarioInput) {
     await this.getById(id);
 
