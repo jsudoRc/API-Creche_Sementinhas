@@ -1,16 +1,15 @@
-import { promise } from 'zod';
 import { db } from '../config/database';
+
 import { 
     Funcionario, 
     CreateFuncionarioInput, 
     UpdateFuncionarioInput 
 } from '../models/funcionario.model';
-import { release } from 'node:os';
 
 export const funcionarioRepository = {
     findAll(): Promise<Funcionario[]> {
         return new Promise((resolve, reject) => {
-            db.all('SELECT * FROM funcionarios ORDER BY id', (err, rows: Funcionario[]) => {
+            db.all('SELECT id, nome, email FROM funcionarios ORDER BY id', (err, rows: Funcionario[]) => {
                 if (err) reject(err);
                 else resolve(rows);
             });
@@ -20,7 +19,7 @@ export const funcionarioRepository = {
     findById(id: number): Promise<Funcionario | null> {
         return new Promise((resolve, reject) => {
             db.get(
-                'SELECT * FROM funcionarios WHERE id = ?', 
+                'SELECT id, nome, email FROM funcionarios WHERE id = ?', 
                 [id], 
                 (err, row: Funcionario | undefined) => {
                     if (err) reject(err);

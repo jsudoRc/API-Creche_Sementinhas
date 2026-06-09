@@ -1,28 +1,64 @@
 ### ==========================================
+### 0. CHECAGEM INICIAL
+### ==========================================
+
+### Verificar se o servidor está rodando
+GET http://localhost:3000/
+
+### ==========================================
 ### 1. FUNCIONÁRIOS (O Sistema de Login)
 ### ==========================================
 
-### Listar todos os funcionários (Deve trazer a Tia Maria e o Tio João do nosso seed)
-GET http://localhost:3000/funcionarios
+### Listar um funcionário por ID (substitua 5 por um ID existente retornado em GET /funcionarios)
+GET http://localhost:3000/funcionarios/5
 
 ### Criar uma nova professora
 POST http://localhost:3000/funcionarios
 Content-Type: application/json
 
 {
-    "nome": "Tia Roberta",
-    "email": "roberta@sementinhas.com",
-    "senha": "senhaforte123"
+  "nome": "Tia Roberta",
+  "email": "roberta@sementinhas.com",
+  "senha": "senhaforte123"
 }
 
-### Teste de Falha (Zod) - Tentar criar funcionário com e-mail inválido
+### Login de funcionário
+POST http://localhost:3000/funcionarios/login
+Content-Type: application/json
+
+{
+  "email": "roberta@sementinhas.com",
+  "senha": "senhaforte123"
+}
+
+### Atualizar um funcionário existente (substitua 5 por um ID existente)
+PUT http://localhost:3000/funcionarios/5
+Content-Type: application/json
+
+{
+  "nome": "Tia Roberta Atualizada",
+  "email": "roberta.atualizada@sementinhas.com"
+}
+
+### Alterar senha de um funcionário (substitua 5 por um ID existente)
+PUT http://localhost:3000/funcionarios/5/senha
+Content-Type: application/json
+
+{
+  "senha": "NovaSenha12345"
+}
+
+### Deletar um funcionário (substitua 5 por um ID existente)
+DELETE http://localhost:3000/funcionarios/5
+
+### Teste de Falha (Zod) - E-mail inválido
 POST http://localhost:3000/funcionarios
 Content-Type: application/json
 
 {
-    "nome": "Hacker da Silva",
-    "email": "email-invalido",
-    "senha": "123"
+  "nome": "Hacker da Silva",
+  "email": "email-invalido",
+  "senha": "123"
 }
 
 ### ==========================================
@@ -37,12 +73,12 @@ POST http://localhost:3000/turmas
 Content-Type: application/json
 
 {
-    "nome": "Jardim I",
-    "idade_min": 4,
-    "idade_max": 5,
-    "capacidade": 20,
-    "valor_mensal": 650.00,
-    "periodo": "manhã"
+  "nome": "Jardim I",
+  "idade_min": 4,
+  "idade_max": 5,
+  "capacidade": 20,
+  "valor_mensal": 650.00,
+  "periodo": "manhã"
 }
 
 ### Teste de Falha (Zod) - Idade Mínima maior que a Máxima
@@ -50,12 +86,12 @@ POST http://localhost:3000/turmas
 Content-Type: application/json
 
 {
-    "nome": "Turma Invalida",
-    "idade_min": 5,
-    "idade_max": 3,
-    "capacidade": 10,
-    "valor_mensal": 500.00,
-    "periodo": "integral"
+  "nome": "Turma Invalida",
+  "idade_min": 5,
+  "idade_max": 3,
+  "capacidade": 10,
+  "valor_mensal": 500.00,
+  "periodo": "integral"
 }
 
 ### ==========================================
@@ -67,13 +103,13 @@ POST http://localhost:3000/alunos
 Content-Type: application/json
 
 {
-    "nome": "Enzo Gabriel",
-    "data_nasc": "2023-05-15",
-    "andarilha": 1,
-    "autorizacao_img": 1,
-    "turma_id": 1,
-    "funcionario_id": 1,
-    "observacoes": "Alergia a amendoim"
+  "nome": "Enzo Gabriel",
+  "data_nasc": "2023-05-15",
+  "andarilha": 1,
+  "autorizacao_img": 1,
+  "turma_id": 1,
+  "funcionario_id": 1,
+  "observacoes": "Alergia a amendoim"
 }
 
 ### Listar Alunos (Deve mostrar o Enzo)
@@ -84,8 +120,8 @@ PUT http://localhost:3000/alunos/1
 Content-Type: application/json
 
 {
-    "cirurgia_qual": "Retirada de amígdalas",
-    "cirurgia_tempo": "2 meses atrás"
+  "cirurgia_qual": "Retirada de amígdalas",
+  "cirurgia_tempo": "2 meses atrás"
 }
 
 ### ==========================================
@@ -97,12 +133,12 @@ POST http://localhost:3000/responsaveis
 Content-Type: application/json
 
 {
-    "nome": "Carlos Gabriel",
-    "cpf": "12345678901",
-    "cep": "13330000",
-    "parentesco": "Pai",
-    "profissao": "Engenheiro",
-    "responsavel_finance": 1
+  "nome": "Carlos Gabriel",
+  "cpf": "12345678901",
+  "cep": "13330000",
+  "parentesco": "Pai",
+  "profissao": "Engenheiro",
+  "responsavel_finance": 1
 }
 
 ### Listar Responsáveis
@@ -117,13 +153,13 @@ POST http://localhost:3000/matriculas
 Content-Type: application/json
 
 {
-    "plano": "Integral",
-    "valor_mensalidade": 850.50,
-    "data_venc": 10,
-    "inicio_vigencia": "2026-06-01",
-    "fim_vigencia": "2026-12-15",
-    "forma_pagamento": "PIX",
-    "aluno_id": 1
+  "plano": "Integral",
+  "valor_mensalidade": 850.50,
+  "data_venc": 10,
+  "inicio_vigencia": "2026-06-01",
+  "fim_vigencia": "2026-12-15",
+  "forma_pagamento": "PIX",
+  "aluno_id": 1
 }
 
 ### Listar Matrículas
@@ -138,9 +174,9 @@ POST http://localhost:3000/responsaveis-transporte
 Content-Type: application/json
 
 {
-    "nome": "Tio Valdir (Van)",
-    "rg": "12345678X",
-    "parentesco": "Motorista Contratado"
+  "nome": "Tio Valdir (Van)",
+  "rg": "12345678x",
+  "parentesco": "Motorista Contratado"
 }
 
 ### Cadastrar Contato de Emergência (Avó)
@@ -148,9 +184,9 @@ POST http://localhost:3000/contatos-emergencia
 Content-Type: application/json
 
 {
-    "nome": "Dona Lourdes Pereira",
-    "rg": "9876543212",
-    "parentesco": "Avó Materna"
+  "nome": "Dona Lourdes Pereira",
+  "rg": "9876543212",
+  "parentesco": "Avó Materna"
 }
 
 ### Cadastrar Arquivo Físico (PDF do Contrato)
@@ -158,7 +194,8 @@ POST http://localhost:3000/arquivos
 Content-Type: application/json
 
 {
-    "caminho_arquivo": "/uploads/contratos/enzo_gabriel_2026.pdf",
-    "tipo_arquivo": "Contrato Assinado",
-    "aluno_id": 1
+  "caminho_arquivo": "/uploads/contratos/enzo_gabriel_2026.pdf",
+  "tipo_arquivo": "Contrato Assinado",
+  "aluno_id": 1
 }
+
