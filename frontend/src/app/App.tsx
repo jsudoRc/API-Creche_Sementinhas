@@ -1,13 +1,26 @@
 import { useState } from 'react';
-import { Users, UserPlus, BookOpen, Calendar, FileText, Menu, Baby } from 'lucide-react';
+import { Users, UserPlus, BookOpen, Calendar, Menu, Baby, LogOut } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import CadastroAluno from './pages/CadastroAluno';
 import ListaAlunos from './pages/ListaAlunos';
 import Turmas from './pages/Turmas';
+import Login from './pages/Login';
+import { Funcionario } from './services/api';
+
+const AUTH_STORAGE_KEY = 'sementinhas_funcionario';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [funcionarioLogado, setFuncionarioLogado] = useState<Omit<Funcionario, 'senha'> | null>(() => {
+    const storedFuncionario = localStorage.getItem(AUTH_STORAGE_KEY);
+    try {
+      return storedFuncionario ? JSON.parse(storedFuncionario) : null;
+    } catch {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      return null;
+    }
+  });
 
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard', icon: Calendar },
@@ -31,10 +44,25 @@ export default function App() {
     }
   };
 
+  const handleLogin = (funcionario: Omit<Funcionario, 'senha'>) => {
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(funcionario));
+    setFuncionarioLogado(funcionario);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    setFuncionarioLogado(null);
+    setCurrentPage('dashboard');
+  };
+
+  if (!funcionarioLogado) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
-      <aside className={`bg-[#4A7C4E] text-white transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'}`}>
+      <aside className={`bg-[#4A7C4E] text-white transition-all duration-300 flex flex-col ${sidebarOpen ? 'w-64' : 'w-20'}`}>
         <div className="p-4 flex items-center justify-between border-b border-[#3D6640]">
           {sidebarOpen && (
             <div className="flex items-center gap-3">
@@ -72,6 +100,23 @@ export default function App() {
             );
           })}
         </nav>
+
+        <div className="mt-auto p-4 border-t border-[#3D6640]">
+          {sidebarOpen && (
+            <div className="mb-3">
+              <p className="text-xs text-green-100">Funcionário logado</p>
+              <p className="text-sm font-semibold truncate">{funcionarioLogado.nome}</p>
+            </div>
+          )}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-[#3D6640] text-white transition-all"
+            title="Sair"
+          >
+            <LogOut className="h-5 w-5 flex-shrink-0" />
+            {sidebarOpen && <span className="font-medium">Sair</span>}
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}

@@ -1,5 +1,5 @@
 import { isAxiosError } from 'axios';
-import { Baby, Users, Clock, AlertCircle, Loader2, PlusCircle } from 'lucide-react';
+import { Baby, Users, Clock, AlertCircle, Loader2, PlusCircle, Edit2, Trash2, X, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { TurmaService, AlunoService, Turma, Aluno } from '../services/api';
 
@@ -25,6 +25,11 @@ export default function Turmas() {
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editData, setEditData] = useState(FORM_INICIAL);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [savingEditId, setSavingEditId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Estados para os cards de estatísticas globais
   const [stats, setStats] = useState({
@@ -100,13 +105,13 @@ export default function Turmas() {
     }));
   };
 
-  const validarFormulario = () => {
-    const idadeMin = Number(formData.idade_min);
-    const idadeMax = Number(formData.idade_max);
-    const capacidade = Number(formData.capacidade);
-    const valorMensal = Number(formData.valor_mensal);
+  const validarFormulario = (dados = formData) => {
+    const idadeMin = Number(dados.idade_min);
+    const idadeMax = Number(dados.idade_max);
+    const capacidade = Number(dados.capacidade);
+    const valorMensal = Number(dados.valor_mensal);
 
-    if (!formData.nome.trim()) return 'Informe o nome da turma.';
+    if (!dados.nome.trim()) return 'Informe o nome da turma.';
     if (!Number.isInteger(idadeMin) || idadeMin < 0) return 'A idade mínima deve ser um número inteiro não negativo.';
     if (!Number.isInteger(idadeMax) || idadeMax <= 0) return 'A idade máxima deve ser um número inteiro maior que zero.';
     if (idadeMin > idadeMax) return 'A idade mínima deve ser menor ou igual à idade máxima.';
@@ -147,6 +152,91 @@ export default function Turmas() {
       setFormError(getApiErrorMessage(err, 'Erro ao cadastrar turma. Verifique os dados e tente novamente.'));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const iniciarEdicao = (turma: Turma) => {
+    setEditingId(turma.id);
+    setEditError(null);
+    setFormError(null);
+    setFormSuccess(null);
+    setEditData({
+      nome: turma.nome,
+      idade_min: String(turma.idade_min),
+      idade_max: String(turma.idade_max),
+      capacidade: String(turma.capacidade),
+      valor_mensal: String(turma.valor_mensal),
+      periodo: turma.periodo,
+    });
+  };
+
+  const cancelarEdicao = () => {
+    setEditingId(null);
+    setEditData(FORM_INICIAL);
+    setEditError(null);
+  };
+
+  const handleEditChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setEditError(null);
+    setEditData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const salvarEdicao = async (turmaId: number) => {
+    const erroValidacao = validarFormulario(editData);
+    if (erroValidacao) {
+      setEditError(erroValidacao);
+      return;
+    }
+
+    try {
+      setSavingEditId(turmaId);
+      setEditError(null);
+
+      await TurmaService.update(turmaId, {
+        nome: editData.nome.trim(),
+        idade_min: Number(editData.idade_min),
+        idade_max: Number(editData.idade_max),
+        capacidade: Number(editData.capacidade),
+        valor_mensal: Number(editData.valor_mensal),
+        periodo: editData.periodo,
+      });
+
+      cancelarEdicao();
+      setFormSuccess('Turma atualizada com sucesso.');
+      await carregarDados();
+    } catch (err) {
+      console.error('Erro ao atualizar turma:', err);
+      setEditError(getApiErrorMessage(err, 'Erro ao atualizar turma. Verifique os dados e tente novamente.'));
+    } finally {
+      setSavingEditId(null);
+    }
+  };
+
+  const excluirTurma = async (turma: TurmaComAlunos) => {
+    if (turma.alunos.length > 0) {
+      iniciarEdicao(turma);
+      setEditError('Não é possível excluir uma turma com alunos vinculados.');
+      return;
+    }
+
+    if (!window.confirm(`Tem certeza que deseja excluir a turma "${turma.nome}"?`)) return;
+
+    try {
+      setDeletingId(turma.id);
+      setFormError(null);
+      setFormSuccess(null);
+      await TurmaService.delete(turma.id);
+      setFormSuccess('Turma excluída com sucesso.');
+      await carregarDados();
+    } catch (err) {
+      console.error('Erro ao excluir turma:', err);
+      setFormError(getApiErrorMessage(err, 'Erro ao excluir turma. Tente novamente.'));
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -417,6 +507,155 @@ export default function Turmas() {
 
               {/* Content */}
               <div className="p-4">
+                <div className="flex justify-end gap-2 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => iniciarEdicao(turma)}
+                    className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => excluirTurma(turma)}
+                    disabled={deletingId === turma.id}
+                    className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-red-700 border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {deletingId === turma.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    Excluir
+                  </button>
+                </div>
+
+                {editingId === turma.id && (
+                  <div className="mb-4 border border-slate-200 rounded-lg p-4 bg-slate-50">
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <h4 className="text-sm font-semibold text-slate-800">Editar turma</h4>
+                      <button
+                        type="button"
+                        onClick={cancelarEdicao}
+                        className="text-slate-500 hover:text-slate-700 transition-colors"
+                        aria-label="Cancelar edição"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    {editError && (
+                      <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-red-700 font-medium">{editError}</p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Nome da Turma</label>
+                        <input
+                          type="text"
+                          name="nome"
+                          value={editData.nome}
+                          onChange={handleEditChange}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Período</label>
+                        <select
+                          name="periodo"
+                          value={editData.periodo}
+                          onChange={handleEditChange}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+                        >
+                          <option value="manhã">Manhã</option>
+                          <option value="tarde">Tarde</option>
+                          <option value="integral">Integral</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Capacidade</label>
+                        <input
+                          type="number"
+                          name="capacidade"
+                          value={editData.capacidade}
+                          onChange={handleEditChange}
+                          min="1"
+                          step="1"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Idade mínima</label>
+                        <input
+                          type="number"
+                          name="idade_min"
+                          value={editData.idade_min}
+                          onChange={handleEditChange}
+                          min="0"
+                          step="1"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Idade máxima</label>
+                        <input
+                          type="number"
+                          name="idade_max"
+                          value={editData.idade_max}
+                          onChange={handleEditChange}
+                          min="1"
+                          step="1"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+                        />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-medium text-slate-700 mb-1">Valor mensal (R$)</label>
+                        <input
+                          type="number"
+                          name="valor_mensal"
+                          value={editData.valor_mensal}
+                          onChange={handleEditChange}
+                          min="0.01"
+                          step="0.01"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={cancelarEdicao}
+                        className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-white transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => salvarEdicao(turma.id)}
+                        disabled={savingEditId === turma.id}
+                        className="px-4 py-2 bg-[#4A7C4E] text-white rounded-lg hover:bg-[#3D6640] transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                      >
+                        {savingEditId === turma.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Save className="h-4 w-4" />
+                        )}
+                        Salvar
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-4 mb-4 text-sm text-slate-600">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
