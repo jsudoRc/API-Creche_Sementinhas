@@ -1,11 +1,10 @@
-import { promise } from 'zod';
 import { db } from '../config/database';
+
 import { 
     Funcionario, 
     CreateFuncionarioInput, 
     UpdateFuncionarioInput 
 } from '../models/funcionario.model';
-import { release } from 'node:os';
 
 export const funcionarioRepository = {
     findAll(): Promise<Funcionario[]> {

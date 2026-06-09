@@ -1,4 +1,5 @@
 // Criando o service para a entidade Turma.
+import { AppError } from '../errors/app-error';
 import {
     Turma,
     CreateTurmaInput,
@@ -27,9 +28,7 @@ export const turmaService = {
 
         // Regra de negócio
         if (input.idade_min > input.idade_max) {
-            throw new Error(
-                'A idade mínima não pode ser maior que a idade máxima.'
-            );
+            throw new AppError('A idade mínima não pode ser maior que a idade máxima.', 400);  
         }
 
         return turmaRepository.create(input);
@@ -44,7 +43,7 @@ export const turmaService = {
             await turmaRepository.findById(id);
 
         if (!turmaExistente) {
-            throw new Error('Turma não encontrada.');
+            throw new AppError('Turma não encontrada.', 404);
         }
 
         const idadeMin =
@@ -54,9 +53,7 @@ export const turmaService = {
             input.idade_max ?? turmaExistente.idade_max;
 
         if (idadeMin > idadeMax) {
-            throw new Error(
-                'A idade mínima não pode ser maior que a idade máxima.'
-            );
+            throw new AppError('A idade mínima não pode ser maior que a idade máxima.', 400);
         }
 
         return turmaRepository.update(id, input);
@@ -68,7 +65,7 @@ export const turmaService = {
             await turmaRepository.findById(id);
 
         if (!turmaExistente) {
-            throw new Error('Turma não encontrada.');
+            throw new AppError('Turma não encontrada.', 404);
         }
 
         return turmaRepository.delete(id);

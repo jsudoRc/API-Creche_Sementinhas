@@ -12,7 +12,7 @@ const db = new sqlite3.Database(dbPath)
 db.exec(schema,(err)=>{
 
     if(err){
-        console.error('Erro ao criar o schema')
+        console.error('Erro ao criar o schema:', err?.message)
         process.exit(1)
     }
 

@@ -9,6 +9,9 @@ export const app = express()
 app.use(cors());//2. Libera a catraca para o Front-end entrar com requisições
 app.use(express.json());
 
+app.get('/', (_req, res) => {
+  res.send('API Creche Sementinhas funcionando');
+});
 
 // Pluga todas as rotas
 app.use(routes);
