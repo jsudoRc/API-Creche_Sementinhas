@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Save, User, Baby, DollarSign, FileText, Loader2 } from 'lucide-react';
+import { isAxiosError } from 'axios';
+import { Save, User, Baby, DollarSign, FileText, Loader2, AlertCircle } from 'lucide-react';
 import {
   AlunoService,
   TurmaService,
@@ -48,25 +49,35 @@ export default function CadastroAluno() {
   const [step, setStep]                       = useState(1);
   const [turmas, setTurmas]                   = useState<Turma[]>([]);
   const [funcionarios, setFuncionarios]       = useState<Funcionario[]>([]);
+  const [isLoading, setIsLoading]             = useState(true);
   const [isSubmitting, setIsSubmitting]       = useState(false);
+  const [error, setError]                     = useState<string | null>(null);
+  const [submitError, setSubmitError]         = useState<string | null>(null);
   const [formData, setFormData]               = useState(FORM_INICIAL);
 
   // Carrega turmas e funcionários ao montar o componente
+  const carregarDadosIniciais = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const [resTurmas, resFuncs] = await Promise.all([
+        TurmaService.getAll(),
+        FuncionarioService.getAll(),
+      ]);
+
+      setTurmas(resTurmas.data);
+      setFuncionarios(resFuncs.data);
+    } catch (err) {
+      console.error('Erro ao carregar dados iniciais:', err);
+      setError(getApiErrorMessage(err, 'Erro ao carregar turmas/funcionários. Verifique a conexão com o backend.'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const carregar = async () => {
-      try {
-        const [resTurmas, resFuncs] = await Promise.all([
-          TurmaService.getAll(),
-          FuncionarioService.getAll(),
-        ]);
-        setTurmas(resTurmas.data);
-        setFuncionarios(resFuncs.data);
-      } catch (err) {
-        console.error('Erro ao carregar dados iniciais:', err);
-        alert('Erro ao carregar turmas/funcionários. Verifique a conexão com o backend.');
-      }
-    };
-    carregar();
+    carregarDadosIniciais();
   }, []);
 
   // Handler genérico para inputs, selects, textareas e checkboxes
@@ -75,20 +86,85 @@ export default function CadastroAluno() {
   ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
+    setSubmitError(null);
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
+  const limparNumeros = (valor: string) => valor.replace(/\D/g, '');
+
+  const getApiErrorMessage = (err: unknown, fallback: string) => {
+    if (isAxiosError(err)) {
+      const data = err.response?.data as { error?: string; details?: Array<{ message?: string }> } | undefined;
+      const detail = data?.details?.find(item => item.message)?.message;
+      return detail || data?.error || fallback;
+    }
+
+    return fallback;
+  };
+
+  const validarPasso = (passoAtual: number) => {
+    if (passoAtual === 1) {
+      if (formData.nome.trim().length < 2) return 'Informe o nome completo do aluno.';
+      if (!formData.data_nasc) return 'Informe a data de nascimento do aluno.';
+      if (limparNumeros(formData.cpf).length !== 11) return 'Informe um CPF de aluno com 11 dígitos.';
+      if (!formData.sexo) return 'Selecione o sexo do aluno.';
+    }
+
+    if (passoAtual === 2) {
+      if (formData.resp_nome.trim().length < 2) return 'Informe o nome completo do responsável.';
+      if (limparNumeros(formData.resp_cpf).length !== 11) return 'Informe um CPF de responsável com 11 dígitos.';
+      if (limparNumeros(formData.resp_cep).length < 8) return 'Informe um CEP de responsável com pelo menos 8 dígitos.';
+      if (!formData.resp_parentesco) return 'Selecione o parentesco do responsável.';
+    }
+
+    if (passoAtual === 3) {
+      const valorMensalidade = Number(formData.valor_mensalidade);
+      if (!formData.turma_id) return 'Selecione uma turma.';
+      if (!formData.funcionario_id) return 'Selecione o funcionário responsável.';
+      if (!formData.plano) return 'Selecione o plano.';
+      if (!formData.forma_pagamento) return 'Selecione a forma de pagamento.';
+      if (!Number.isFinite(valorMensalidade) || valorMensalidade <= 0) return 'Informe uma mensalidade maior que zero.';
+      if (!formData.data_venc) return 'Selecione o dia de vencimento.';
+      if (!formData.inicio_vigencia) return 'Informe o início da vigência.';
+      if (!formData.fim_vigencia) return 'Informe o fim da vigência.';
+      if (formData.fim_vigencia < formData.inicio_vigencia) return 'O fim da vigência deve ser igual ou posterior ao início.';
+    }
+
+    return null;
+  };
+
+  const avancarPasso = () => {
+    const erroValidacao = validarPasso(step);
+
+    if (erroValidacao) {
+      setSubmitError(erroValidacao);
+      return;
+    }
+
+    setSubmitError(null);
+    setStep(s => Math.min(4, s + 1));
+  };
+
   // Submissão: salva aluno → responsável → matrícula em sequência
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+
+    const erroValidacao = validarPasso(3);
+    if (erroValidacao) {
+      setSubmitError(erroValidacao);
+      setStep(3);
+      return;
+    }
 
     try {
+      setIsSubmitting(true);
+      setSubmitError(null);
+
       // ── 1. Criar o Aluno ──────────────────────────────────────────────────
-      const cpfLimpo = formData.cpf.replace(/\D/g, ''); // remove pontos e traços
+      const cpfLimpo = limparNumeros(formData.cpf);
       const resAluno = await AlunoService.create({
         nome:                formData.nome,
         data_nasc:           formData.data_nasc,
@@ -132,8 +208,8 @@ export default function CadastroAluno() {
       const alunoId = resAluno.data.id;
 
       // ── 2. Criar o Responsável principal ─────────────────────────────────
-      const cpfRespLimpo = formData.resp_cpf.replace(/\D/g, '');
-      const cepRespLimpo = formData.resp_cep.replace(/\D/g, '');
+      const cpfRespLimpo = limparNumeros(formData.resp_cpf);
+      const cepRespLimpo = limparNumeros(formData.resp_cep);
       await ResponsavelService.create({
         nome:                formData.resp_nome,
         cpf:                 cpfRespLimpo,
@@ -144,9 +220,7 @@ export default function CadastroAluno() {
       });
 
       // ── 3. Criar a Matrícula ──────────────────────────────────────────────
-      const valorNum = parseFloat(
-        formData.valor_mensalidade.replace(/[R$\s]/g, '').replace(',', '.')
-      );
+      const valorNum = Number(formData.valor_mensalidade);
       await MatriculaService.create({
         plano:            formData.plano,
         valor_mensalidade: valorNum,
@@ -164,7 +238,7 @@ export default function CadastroAluno() {
 
     } catch (err) {
       console.error('Erro ao salvar matrícula:', err);
-      alert('Erro ao realizar a matrícula. Verifique os dados e tente novamente.');
+      setSubmitError(getApiErrorMessage(err, 'Erro ao realizar a matrícula. Verifique os dados e tente novamente.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -513,6 +587,32 @@ export default function CadastroAluno() {
   };
 
   // ─── Render principal ─────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+        <Loader2 className="h-10 w-10 animate-spin text-[#4A7C4E]" />
+        <p className="text-slate-600 text-sm font-medium">Carregando dados da matrícula...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center max-w-xl mx-auto my-8">
+        <AlertCircle className="h-10 w-10 text-red-600 mx-auto mb-3" />
+        <h3 className="text-lg font-bold text-red-900 mb-1">Erro de Conexão</h3>
+        <p className="text-red-700 text-sm mb-4">{error}</p>
+        <button
+          type="button"
+          onClick={carregarDadosIniciais}
+          className="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-700 transition-colors"
+        >
+          Tentar Novamente
+        </button>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="bg-white rounded-lg shadow-md border border-slate-200">
@@ -544,6 +644,13 @@ export default function CadastroAluno() {
 
         {/* Conteúdo do passo atual */}
         <div className="p-8">
+          {submitError && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-red-700 font-medium">{submitError}</p>
+            </div>
+          )}
+
           {step === 1 && renderStep1()}
           {step === 2 && renderStep2()}
           {step === 3 && renderStep3()}
@@ -564,7 +671,7 @@ export default function CadastroAluno() {
           {step < 4 ? (
             <button
               type="button"
-              onClick={() => setStep(s => Math.min(4, s + 1))}
+              onClick={avancarPasso}
               className="px-6 py-3 bg-[#4A7C4E] text-white rounded-lg hover:bg-[#3D6640] transition-colors"
             >
               Próximo

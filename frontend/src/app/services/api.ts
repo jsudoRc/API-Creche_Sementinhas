@@ -4,19 +4,17 @@ import axios from 'axios';
 // 1. CONFIGURAÇÃO BASE DO AXIOS
 // ==========================================
 
-// Em desenvolvimento, VITE_API_URL deve ser http://localhost:3000
-// Em produção (Render), VITE_API_URL deve ser https://api-creche-sementinhas.onrender.com
-const BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL?.trim();
 
-if (!BASE_URL) {
-  console.error(
-    '[api.ts] VITE_API_URL não definida. Crie o arquivo frontend/.env com:\n' +
-    'VITE_API_URL=http://localhost:3000'
+if (!API_BASE_URL) {
+  throw new Error(
+    '[api.ts] VITE_API_URL não definida. Configure a variável em frontend/.env. ' +
+    'Veja frontend/.env.example.'
   );
 }
 
 export const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -145,13 +143,13 @@ export interface Arquivo {
 // ==========================================
 // 3. FUNÇÃO GENÉRICA DE CRUD
 // ==========================================
-function createCrudService<T>(resource: string) {
+function createCrudService<T, TCreate = Omit<T, 'id'>>(resource: string) {
   return {
     getAll: () => api.get<T[]>(`/${resource}`),
     getById: (id: number) => api.get<T>(`/${resource}/${id}`),
-    create: (data: Omit<T, 'id'>) => api.post<T>(`/${resource}`, data),
-    update: (id: number, data: Partial<T>) => api.put<T>(`/${resource}/${id}`, data),
-    delete: (id: number) => api.delete(`/${resource}/${id}`),
+    create: (data: TCreate) => api.post<T>(`/${resource}`, data),
+    update: (id: number, data: Partial<TCreate>) => api.put<T>(`/${resource}/${id}`, data),
+    delete: (id: number) => api.delete<void>(`/${resource}/${id}`),
   };
 }
 

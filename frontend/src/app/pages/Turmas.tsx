@@ -1,4 +1,5 @@
-import { Baby, Users, Clock, AlertCircle, Loader2 } from 'lucide-react';
+import { isAxiosError } from 'axios';
+import { Baby, Users, Clock, AlertCircle, Loader2, PlusCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { TurmaService, AlunoService, Turma, Aluno } from '../services/api';
 
@@ -7,10 +8,23 @@ interface TurmaComAlunos extends Turma {
   alunos: Aluno[];
 }
 
+const FORM_INICIAL = {
+  nome: '',
+  idade_min: '',
+  idade_max: '',
+  capacidade: '',
+  valor_mensal: '',
+  periodo: 'integral' as Turma['periodo'],
+};
+
 export default function Turmas() {
   const [turmas, setTurmas] = useState<TurmaComAlunos[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState(FORM_INICIAL);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formSuccess, setFormSuccess] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Estados para os cards de estatísticas globais
   const [stats, setStats] = useState({
@@ -63,6 +77,76 @@ export default function Turmas() {
       setError("Não foi possível carregar as informações das turmas. Tente novamente mais tarde.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getApiErrorMessage = (err: unknown, fallback: string) => {
+    if (isAxiosError(err)) {
+      const data = err.response?.data as { message?: string; error?: string; details?: Array<{ message?: string }> } | undefined;
+      const detail = data?.details?.find(item => item.message)?.message;
+      return detail || data?.message || data?.error || fallback;
+    }
+
+    return fallback;
+  };
+
+  const handleFormChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setFormError(null);
+    setFormSuccess(null);
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validarFormulario = () => {
+    const idadeMin = Number(formData.idade_min);
+    const idadeMax = Number(formData.idade_max);
+    const capacidade = Number(formData.capacidade);
+    const valorMensal = Number(formData.valor_mensal);
+
+    if (!formData.nome.trim()) return 'Informe o nome da turma.';
+    if (!Number.isInteger(idadeMin) || idadeMin < 0) return 'A idade mínima deve ser um número inteiro não negativo.';
+    if (!Number.isInteger(idadeMax) || idadeMax <= 0) return 'A idade máxima deve ser um número inteiro maior que zero.';
+    if (idadeMin > idadeMax) return 'A idade mínima deve ser menor ou igual à idade máxima.';
+    if (!Number.isInteger(capacidade) || capacidade <= 0) return 'A capacidade deve ser um número inteiro maior que zero.';
+    if (!Number.isFinite(valorMensal) || valorMensal <= 0) return 'O valor mensal deve ser maior que zero.';
+
+    return null;
+  };
+
+  const cadastrarTurma = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const erroValidacao = validarFormulario();
+    if (erroValidacao) {
+      setFormError(erroValidacao);
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      setFormError(null);
+      setFormSuccess(null);
+
+      await TurmaService.create({
+        nome: formData.nome.trim(),
+        idade_min: Number(formData.idade_min),
+        idade_max: Number(formData.idade_max),
+        capacidade: Number(formData.capacidade),
+        valor_mensal: Number(formData.valor_mensal),
+        periodo: formData.periodo,
+      });
+
+      setFormData(FORM_INICIAL);
+      setFormSuccess('Turma cadastrada com sucesso.');
+      await carregarDados();
+    } catch (err) {
+      console.error('Erro ao cadastrar turma:', err);
+      setFormError(getApiErrorMessage(err, 'Erro ao cadastrar turma. Verifique os dados e tente novamente.'));
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -133,6 +217,138 @@ export default function Turmas() {
 
   return (
     <div className="space-y-6">
+      {/* Cadastro de Turma */}
+      <form onSubmit={cadastrarTurma} className="bg-white rounded-lg shadow-md p-6 border border-slate-200">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="bg-[#4A7C4E] p-3 rounded-lg">
+            <PlusCircle className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-slate-800">Cadastrar Turma</h3>
+            <p className="text-sm text-slate-500">Crie uma turma usando os campos exigidos pelo backend.</p>
+          </div>
+        </div>
+
+        {formError && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-red-700 font-medium">{formError}</p>
+          </div>
+        )}
+
+        {formSuccess && (
+          <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm text-green-700 font-medium">{formSuccess}</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">Nome da Turma *</label>
+            <input
+              type="text"
+              name="nome"
+              value={formData.nome}
+              onChange={handleFormChange}
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+              placeholder="Ex: Maternal 1"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Período *</label>
+            <select
+              name="periodo"
+              value={formData.periodo}
+              onChange={handleFormChange}
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+              required
+            >
+              <option value="manhã">Manhã</option>
+              <option value="tarde">Tarde</option>
+              <option value="integral">Integral</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Idade mínima *</label>
+            <input
+              type="number"
+              name="idade_min"
+              value={formData.idade_min}
+              onChange={handleFormChange}
+              min="0"
+              step="1"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Idade máxima *</label>
+            <input
+              type="number"
+              name="idade_max"
+              value={formData.idade_max}
+              onChange={handleFormChange}
+              min="1"
+              step="1"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Capacidade *</label>
+            <input
+              type="number"
+              name="capacidade"
+              value={formData.capacidade}
+              onChange={handleFormChange}
+              min="1"
+              step="1"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Valor mensal (R$) *</label>
+            <input
+              type="number"
+              name="valor_mensal"
+              value={formData.valor_mensal}
+              onChange={handleFormChange}
+              min="0.01"
+              step="0.01"
+              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#4A7C4E] focus:border-transparent"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-end">
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="px-6 py-3 bg-[#4A7C4E] text-white rounded-lg hover:bg-[#3D6640] transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <PlusCircle className="h-5 w-5" />
+                Cadastrar Turma
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+
       {/* Overview Stats (Dinâmicos) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white rounded-lg shadow-md p-6 border border-slate-200">
